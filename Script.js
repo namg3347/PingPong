@@ -7,6 +7,17 @@ let goal = false;
 let score1 = 0;
 let score2 = 0;
 let speedinc = 0;
+let p1_x = 9;
+let p1_y = canvas.height/2-20;
+let p2_x = canvas.width-10;
+let p2_y = canvas.height/2-20
+
+
+const p1 = new Slider1(p1_x,p1_y);
+const p2 = new Slider2(p2_x,p2_y);
+let ball = new Ball(xc,yc,1);
+const keyState = new KeyState();
+
 
 function drawBoard() {
 
@@ -134,6 +145,19 @@ class Ball {
             // console.log("vely " +this.vel.y);
         }
     }
+    // slider collision
+    sliderColl(p1,p2) {
+        if(this.position.x +this.r > p2.x && this.position.y>=p2.y && this.position.y<=p2.y+20) {
+            speedinc+=0.1;
+            this.position.x = p2.x-this.r;
+            this.vel.x = -this.vel.x;
+        }
+        if(this.position.x -this.r < p1.x+2 && this.position.y>=p1.y && this.position.y<=p1.y+20) {
+            speedinc+=0.1;
+            this.position.x = p1.x+this.r+2;
+            this.vel.x = -this.vel.x;
+        }
+    }
     //when goal is scored
     goalColl() {
         if(this.position.x - this.r<4) {
@@ -150,19 +174,6 @@ class Ball {
             goal = true;
         }
 
-    }
-    // slider collision
-    sliderColl(p1,p2) {
-        if(this.position.x +this.r > p2.x && this.position.y>=p2.y && this.position.y<=p2.y+20) {
-            speedinc+=0.1;
-            this.position.x = p2.x-this.r;
-            this.vel.x = -this.vel.x;
-        }
-        if(this.position.x -this.r < p1.x+2 && this.position.y>=p1.y && this.position.y<=p1.y+20) {
-            speedinc+=0.1;
-            this.position.x = p1.x+this.r+2;
-            this.vel.x = -this.vel.x;
-        }
     }
     
 }
@@ -216,16 +227,6 @@ class Slider2 {
     
 }
 
-let p1_x = 9;
-let p1_y = canvas.height/2-20;
-let p2_x = canvas.width-10;
-let p2_y = canvas.height/2-20
-
-
-const p1 = new Slider1(p1_x,p1_y);
-const p2 = new Slider2(p2_x,p2_y);
-let ball = new Ball(xc,yc,1);
-const keyState = new KeyState();
 
 function mainLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
