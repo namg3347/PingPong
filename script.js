@@ -7,6 +7,7 @@ let goal = false;
 let score1 = 0;
 let score2 = 0;
 let speedinc = 0.2;
+let speedList = [1.5,-1.5,1.75,-1.75];
 
 
 
@@ -91,12 +92,12 @@ class Vector {
 
 
 class Ball {
-    constructor(x,y,r) {
+    constructor(x,y,r,vel_x,vel_y) {
         this.x = x;
         this.y = y;
         this.r = r;
         this.position = new Vector(x,y);
-        this.vel = new Vector(-1.5+speedinc,1.5+speedinc);
+        this.vel = new Vector(vel_x+speedinc,vel_x+speedinc);
     }
     //draw ball
     drawBall() {
@@ -219,7 +220,7 @@ class KeyState {
     }
 }
 
-class Slider1 {
+class Slider {
     constructor(x,y) {
         this.x = x;
         this.y = y;
@@ -230,25 +231,12 @@ class Slider1 {
         ctx.fillStyle = "white";
         ctx.fillRect(this.position.x,this.position.y,2,20);
     }
-    moveSlider() {
+    moveSlider1() {
         if (this.position.y>4 && keyState.isDown("w")) this.position.y -= this.vel.y;
         
         if (this.position.y+24<canvas.height && keyState.isDown("s")) this.position.y += this.vel.y;
     } 
-    
-}
-class Slider2 {
-    constructor(x,y) {
-        this.x = x;
-        this.y = y;
-        this.position = new Vector(x,y);
-        this.vel = new Vector(0,4);
-    }
-    drawSlider() {
-        ctx.fillStyle = "white";
-        ctx.fillRect(this.position.x,this.position.y,2,20);
-    }
-    moveSlider() {
+    moveSlider2() {
         if (this.position.y>4 && keyState.isDown("ArrowUp")) this.position.y -= this.vel.y;
         if (this.position.y+24<canvas.height && keyState.isDown("ArrowDown")) this.position.y += this.vel.y;
     }
@@ -261,9 +249,13 @@ let p2_x = canvas.width-10;
 let p2_y = canvas.height/2-20
 
 
-const p1 = new Slider1(p1_x,p1_y);
-const p2 = new Slider2(p2_x,p2_y);
-let ball = new Ball(xc,yc,1);
+const p1 = new Slider(p1_x,p1_y);
+const p2 = new Slider(p2_x,p2_y);
+let randomIndex1 = Math.floor(Math.random() * speedList.length);
+let randomIndex2 = Math.floor(Math.random() * speedList.length);
+let random_x = speedList[randomIndex1];
+let random_y = speedList[randomIndex2];
+let ball = new Ball(xc,yc,1,random_x,random_y);
 const keyState = new KeyState();
 
 
@@ -276,13 +268,17 @@ function mainLoop() {
     ball.goalColl();
     if(goal) {
         setTimeout(function() {
-            ball = new Ball(xc,yc,1);
+            randomIndex1 = Math.floor(Math.random() * speedList.length);
+            randomIndex2 = Math.floor(Math.random() * speedList.length);
+            random_x = speedList[randomIndex1];
+            random_y = speedList[randomIndex2];
+            ball = new Ball(xc,yc,1,random_x,random_y);
         },300)
         goal = false;
     };
     ball.drawBall();
-    p1.moveSlider();
-    p2.moveSlider();
+    p1.moveSlider1();
+    p2.moveSlider2();
     p1.drawSlider();
     p2.drawSlider();
     requestAnimationFrame(mainLoop); //repeat
