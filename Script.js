@@ -6,17 +6,8 @@ const yc = Math.floor(canvas.height/2) -0.5;
 let goal = false;
 let score1 = 0;
 let score2 = 0;
-let speedinc = 0;
-let p1_x = 9;
-let p1_y = canvas.height/2-20;
-let p2_x = canvas.width-10;
-let p2_y = canvas.height/2-20
+let speedinc = 0.2;
 
-
-const p1 = new Slider1(p1_x,p1_y);
-const p2 = new Slider2(p2_x,p2_y);
-let ball = new Ball(xc,yc,1);
-const keyState = new KeyState();
 
 
 function drawBoard() {
@@ -147,15 +138,47 @@ class Ball {
     }
     // slider collision
     sliderColl(p1,p2) {
-        if(this.position.x +this.r > p2.x && this.position.y>=p2.y && this.position.y<=p2.y+20) {
-            speedinc+=0.1;
-            this.position.x = p2.x-this.r;
-            this.vel.x = -this.vel.x;
+        const maxBounceAngle = Math.PI / 3;
+
+        //inner surface of p1(left) slider
+        if(this.vel.x < 0 &&
+            this.position.x - this.r <= p1.position.x + 2 &&
+            this.position.x - this.r >= p1.position.x &&
+            this.position.y >= p1.position.y &&
+            this.position.y <= p1.position.y + 20
+        ) {
+            this.position.x = p1.position.x + 2 + this.r;
+
+            let center = p1.position.y + 20 / 2;
+            let offset = (this.position.y - center) / (20 / 2);
+            offset = Math.max(-1, Math.min(1, offset));
+
+            let angle = offset * maxBounceAngle;
+            let speed = this.vel.mag();
+
+            this.vel.x = speed * Math.cos(angle)+speedinc;
+            this.vel.y = speed * Math.sin(angle)+speedinc;
+            
         }
-        if(this.position.x -this.r < p1.x+2 && this.position.y>=p1.y && this.position.y<=p1.y+20) {
-            speedinc+=0.1;
-            this.position.x = p1.x+this.r+2;
-            this.vel.x = -this.vel.x;
+        // inner surface of p2(right) slider
+        if( this.vel.x>0 &&
+            this.position.x +this.r >= p2.position.x && 
+            this.position.x +this.r <= p2.position.x+2 && 
+            this.position.y>=p2.position.y && 
+            this.position.y<=p2.position.y+20
+        ) {
+            this.position.x = p2.position.x - this.r;
+
+            let center = p2.position.y + 20 / 2;
+            let offset = (this.position.y - center) / (20 / 2);
+            offset = Math.max(-1, Math.min(1, offset));
+
+            let angle = offset * maxBounceAngle;
+            let speed = this.vel.mag();
+
+            this.vel.x = -speed * Math.cos(angle)+speedinc;
+            this.vel.y = speed * Math.sin(angle)+speedinc;
+            
         }
     }
     //when goal is scored
@@ -200,14 +223,17 @@ class Slider1 {
     constructor(x,y) {
         this.x = x;
         this.y = y;
+        this.position = new Vector(x,y);
+        this.vel = new Vector(0,4);
     }
     drawSlider() {
         ctx.fillStyle = "white";
-        ctx.fillRect(this.x,this.y,2,20);
+        ctx.fillRect(this.position.x,this.position.y,2,20);
     }
     moveSlider() {
-        if (this.y>4 && keyState.isDown("w")) this.y -= 4;
-        if (this.y+24<canvas.height && keyState.isDown("s")) this.y += 4;
+        if (this.position.y>4 && keyState.isDown("w")) this.position.y -= this.vel.y;
+        
+        if (this.position.y+24<canvas.height && keyState.isDown("s")) this.position.y += this.vel.y;
     } 
     
 }
@@ -215,17 +241,30 @@ class Slider2 {
     constructor(x,y) {
         this.x = x;
         this.y = y;
+        this.position = new Vector(x,y);
+        this.vel = new Vector(0,4);
     }
     drawSlider() {
         ctx.fillStyle = "white";
-        ctx.fillRect(this.x,this.y,2,20);
+        ctx.fillRect(this.position.x,this.position.y,2,20);
     }
     moveSlider() {
-        if (this.y>4 && keyState.isDown("ArrowUp")) this.y -= 4;
-        if (this.y+24<canvas.height && keyState.isDown("ArrowDown")) this.y += 4;
+        if (this.position.y>4 && keyState.isDown("ArrowUp")) this.position.y -= this.vel.y;
+        if (this.position.y+24<canvas.height && keyState.isDown("ArrowDown")) this.position.y += this.vel.y;
     }
     
 }
+
+let p1_x = 9;
+let p1_y = canvas.height/2-20;
+let p2_x = canvas.width-10;
+let p2_y = canvas.height/2-20
+
+
+const p1 = new Slider1(p1_x,p1_y);
+const p2 = new Slider2(p2_x,p2_y);
+let ball = new Ball(xc,yc,1);
+const keyState = new KeyState();
 
 
 function mainLoop() {
